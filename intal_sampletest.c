@@ -20,7 +20,7 @@ int main(int argc, char const *argv[]) {
 		}
 		free(result1);
 	}
-
+/*
 	i1 = intal_compare(intal1, intal2);
 	if(-1 == i1) {
 		printf("Test Diff PASSED\n");
@@ -41,4 +41,5 @@ int main(int argc, char const *argv[]) {
 	}
 
 	return 0;
+*/
 }

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "intal.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 typedef struct digit {
     char val1;
@@ -153,5 +153,8 @@ char* intal_add (char *intal_1, char *intal_2)
     }
     char *str;
     str = makeString(&num);
-    return str;
+    if (str[0] == '0')
+        return str+1;
+    else
+        return str;
 }
