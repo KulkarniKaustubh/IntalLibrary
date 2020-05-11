@@ -174,7 +174,7 @@ char* intal_add (char *intal1, char *intal2)
     freeNum(&num);
     return str;
 }
-#if 0
+
 char* intal_diff (char *intal1, char *intal2)
 {
     int isEq = intal_compare(intal1, intal2);
@@ -183,14 +183,15 @@ char* intal_diff (char *intal1, char *intal2)
         intal1 = intal2;
         intal2 = temp;
     }
-    equalise(&intal1, &intal2);
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
 
     if (DEBUG) {
-        printf ("%s\n", intal1);
-        printf ("%s\n", intal2);
+        printf ("%s\n", num1);
+        printf ("%s\n", num2);
     }
 
-    int max = greatestLength(intal1, intal2);
+    int max = greatestLength(num1, num2);
 
     if (DEBUG) {
         printf ("%d\n", max);
@@ -201,7 +202,7 @@ char* intal_diff (char *intal1, char *intal2)
     int carryFlag = 0;
 
     for (int i=max-1; i >= 0; --i) {
-        digit *temp = createNode(intal1[i], intal2[i]);
+        digit *temp = createNode(num1[i], num2[i]);
         int v1 = temp->val1-'0';
         if (carryFlag)
             v1 -= 1;
@@ -225,13 +226,14 @@ char* intal_diff (char *intal1, char *intal2)
 
 int intal_compare (char *intal1, char *intal2)
 {
-    equalise (&intal1, &intal2);
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
     int max = greatestLength(intal1, intal2);
 
     for (int i=0; i < max; i++) {
-        if (intal1[i] < intal2[i]) {
+        if (num1[i] < num2[i]) {
             return -1;
-        } else if (intal1[i] > intal2[i]) {
+        } else if (num1[i] > num2[i]) {
             return 1;
         } else {
             continue;
@@ -247,9 +249,10 @@ char* intal_multiply (char *intal1, char *intal2)
         intal1 = intal2;
         intal2 = temp;
     }
-    int leastLen = strlen(intal2);
-    equalise(&intal1, &intal2);
-    int max = greatestLength(intal1, intal2);
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+    int leastLen = strlen(num2);
+    int max = greatestLength(num1, num2);
     number num[leastLen];
     for (int i=0; i<leastLen; ++i) {
         num[i].head = NULL;
@@ -270,7 +273,7 @@ char* intal_multiply (char *intal1, char *intal2)
             carryFlag = 0;
         }
         for (int j=max-1; j >= 0; --j) {
-            digit *temp = createNode(intal1[j], intal2[i]);
+            digit *temp = createNode(num1[j], num2[i]);
             int v1 = temp->val1-'0';
             int v2 = temp->val2-'0';
             if (v1 == 0 || v2 == 0) {
@@ -304,7 +307,6 @@ char* intal_multiply (char *intal1, char *intal2)
     return fnum;
 }
 
-#endif
 int main()
 {
     char num1[1000]; // = "9983475928347958723948579";
@@ -319,7 +321,7 @@ int main()
         printf("%s\n", num1);
         printf("%s\n", num2);
     }
-    /*
+
     printf ("DIFF: %s\n", intal_diff(num1, num2));
     if (DEBUG){
         printf("%s\n", num1);
@@ -334,5 +336,5 @@ int main()
     if (DEBUG){
         printf("%s\n", num1);
         printf("%s\n", num2);
-    }*/
+    }
 }
