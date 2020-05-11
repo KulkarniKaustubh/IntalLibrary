@@ -81,14 +81,14 @@ void insert (number *num, digit *dig)
     }
     dig->next = num->head;
     num->head = dig;
-    if (dig->next->leftover == '1') {
-        if (dig->fdig == '9') {
-            dig->fdig = '0';
-            dig->leftover = '1';
-        } else {
-            dig->fdig ++;
-        }
-    }
+    // if (dig->next->leftover == '1') {
+    //     if (dig->fdig == '9') {
+    //         dig->fdig = '0';
+    //         dig->leftover = '1';
+    //     } else {
+    //         dig->fdig ++;
+    //     }
+    // }
 }
 
 void displayNumber (number *num)
@@ -101,7 +101,7 @@ void displayNumber (number *num)
     printf ("\n");
 }
 
-int lenList (number *num)
+int numLen (number *num)
 {
     int len = 0;
     digit *temp = num->head;
@@ -115,32 +115,16 @@ int lenList (number *num)
 char* makeString (number *num)
 {
     digit *temp = num->head;
-    if (num->head->leftover == '1') {
-        char *str = (char*)malloc(sizeof(char)*lenList(num)+2);
-        str[0] = '1';
-        for (int i=1; i <= lenList(num); ++i) {
-            if (temp) {
-                str[i] = temp->fdig;
-                temp = temp->next;
-            }
-        }
-        str[lenList(num)+1] = '\0';
-        while (str[0] == '0') {
-            ++str;
-        }
-        return str;
-    } else {
-        char *str = (char*)malloc(sizeof(char)*lenList(num)+1);
-        for (int i=0; i < lenList(num); ++i) {
-            str[i] = temp->fdig;
-            temp = temp->next;
-        }
-        str[lenList(num)] = '\0';
-        while (str[0] == '0') {
-            ++str;
-        }
-        return str;
+    char *str = (char*)malloc(sizeof(char)*numLen(num)+1);
+    for (int i=0; i < numLen(num); ++i) {
+        str[i] = temp->fdig;
+        temp = temp->next;
     }
+    str[numLen(num)] = '\0';
+    while (str[0] == '0') {
+        ++str;
+    }
+    return str;
 }
 
 char* intal_add (char *intal_1, char *intal_2)
@@ -160,14 +144,65 @@ char* intal_add (char *intal_1, char *intal_2)
 
     number num;
     num.head = NULL;
+    int carryFlag = 0;
 
     for (int i=max-1; i >= 0; --i) {
         digit *temp = createNode(intal_1[i], intal_2[i]);
         int v1 = temp->val1-'0';
+        if (carryFlag)
+            v1 += 1;
         int v2 = temp->val2-'0';
         int sum = v1 + v2;
         temp->fdig = (char)((sum%10)+'0');
-        temp->leftover = (char)((sum/10)+'0');
+        if (sum >= 10) {
+            carryFlag = 1;
+        } else {
+            carryFlag = 0;
+        }
+        // temp->leftover = (char)((sum/10)+'0');
+        insert(&num, temp);
+    }
+    if (carryFlag) {
+        digit *temp = createNode('\0', '\0');
+        temp->fdig = '1';
+        insert (&num, temp);
+    }
+    char *str;
+    str = makeString(&num);
+    freeNum(&num);
+    return str;
+}
+
+#if 0
+char* intal_diff (char *inal_1, char *intal_2)
+{
+    equalise(&intal_1, &intal_2);
+
+    if (DEBUG) {
+        printf ("%s\n", intal_1);
+        printf ("%s\n", intal_2);
+    }
+
+    int max = greatestLength(intal_1, intal_2);
+
+    if (DEBUG) {
+        printf ("%d\n", max);
+    }
+
+    number num;
+    num.head = NULL;
+    int carryFlag = 0;
+    for (int i=max-1; i >= 0; --i) {
+        digit *temp = createNode(intal_1[i], intal_2[i]);
+        int v1 = temp->val1-'0';
+        int v2 = temp->val2-'0';
+        int diff = v1 - v2;
+        if (diff<0) {
+            carryFlag = 1;
+            v1 = v1*10;
+            diff = v1 - v2;
+        }
+        temp->fdig = (char)((diff)+'0');
         insert(&num, temp);
     }
     char *str;
@@ -175,6 +210,7 @@ char* intal_add (char *intal_1, char *intal_2)
     freeNum(&num);
     return str;
 }
+#endif
 
 int main()
 {
