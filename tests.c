@@ -21,7 +21,7 @@ int intal_compare(char* intal1, char* intal2);
 char* intal_diff(char* intal1, char* intal2);
 char* intal_multiply(char* intal1, char* intal2);
 int greatestLength (char *str1, char *str2);
-void equalise (char **num1, char **num2);
+void equalise (char *num1, char *num2, char **temp1, char **temp2);
 void insert (number *num, digit *dig);
 void freeNum (number *num);
 
@@ -42,43 +42,45 @@ digit* createNode (char val1, char val2)
     d->val1 = val1;
     d->val2 = val2;
     d->next =NULL;
-    // d->prev = NULL;
     d->fdig = '\0';
     return d;
 }
 
-void equalise (char **num1, char **num2)
+void equalise (char *num1, char *num2, char **temp1, char **temp2)
 {
-    int len1 = strlen(*num1);
-    int len2 = strlen(*num2);
+    int len1 = strlen(num1);
+    int len2 = strlen(num2);
+    *temp1 = num1;
+    *temp2 = num2;
     if (len1 == len2)
         return;
 
-
-    int max = greatestLength(*num1, *num2);
-
-    char *str = (char*)calloc(max+1, sizeof(char));
-    for (int i=0; i<max; ++i) {
-        str[i] ='0';
+    while (*temp1[0] == '0') {
+        ++*temp1;
     }
-    str[max] = '\0';
+    while (*temp2[0] == '0') {
+        ++*temp2;
+    }
+    len1 = strlen(*temp1);
+    len2 = strlen(*temp2);
+    int max = greatestLength(*temp1, *temp2);
+
     if (len1 > len2) {
-        strcpy (str+(len1-len2), *num2);
-        *num2 = str;
-    } else if (len2 > len1) {
-        strcpy (str+(len2-len1), *num1);
-        *num1 = str;
+        for (int i=0; i < (len1-len2); ++i) {
+            --*temp2;
+            **temp2 = '0';
+        }
+    } else {
+        for (int i=0; i < (len2-len1); ++i) {
+            --*temp1;
+            **temp1 = '0';
+        }
     }
 }
 
 int greatestLength (char *str1, char *str2)
 {
     return (strlen(str1) > strlen(str2)) ? strlen(str1) : strlen(str2);
-}
-
-int leastLength (char *str1, char *str2)
-{
-    return (strlen(str1) > strlen(str2)) ? strlen(str2) : strlen(str1);
 }
 
 void insert (number *num, digit *dig)
@@ -132,14 +134,15 @@ char* makeString (number *num)
 
 char* intal_add (char *intal1, char *intal2)
 {
-    equalise(&intal1, &intal2);
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
 
     if (DEBUG) {
-        printf ("%s\n", intal1);
-        printf ("%s\n", intal2);
+        printf ("%s\n", num1);
+        printf ("%s\n", num2);
     }
 
-    int max = greatestLength(intal1, intal2);
+    int max = greatestLength(num1, num2);
 
     if (DEBUG) {
         printf ("%d\n", max);
@@ -150,7 +153,7 @@ char* intal_add (char *intal1, char *intal2)
     int carryFlag = 0;
 
     for (int i=max-1; i >= 0; --i) {
-        digit *temp = createNode(intal1[i], intal2[i]);
+        digit *temp = createNode(num1[i], num2[i]);
         int v1 = temp->val1-'0';
         if (carryFlag)
             v1 += 1;
@@ -171,7 +174,7 @@ char* intal_add (char *intal1, char *intal2)
     freeNum(&num);
     return str;
 }
-
+#if 0
 char* intal_diff (char *intal1, char *intal2)
 {
     int isEq = intal_compare(intal1, intal2);
@@ -292,15 +295,16 @@ char* intal_multiply (char *intal1, char *intal2)
     }
 
     char *fnum = makeString(&num[0]);
+    freeNum(&num[0]);
 
     for (int i=1; i < leastLen; ++i) {
         fnum = intal_add(fnum, makeString(&num[i]));
+        freeNum(&num[i]);
     }
     return fnum;
 }
 
-
-
+#endif
 int main()
 {
     char num1[1000]; // = "9983475928347958723948579";
@@ -311,7 +315,24 @@ int main()
     scanf("%s", num2);
 
     printf ("ADD: %s\n", intal_add(num1, num2));
+    if (DEBUG){
+        printf("%s\n", num1);
+        printf("%s\n", num2);
+    }
+    /*
     printf ("DIFF: %s\n", intal_diff(num1, num2));
+    if (DEBUG){
+        printf("%s\n", num1);
+        printf("%s\n", num2);
+    }
     printf ("COMPARE: %d\n", intal_compare(num1, num2));
+    if (DEBUG){
+        printf("%s\n", num1);
+        printf("%s\n", num2);
+    }
     printf ("MULTIPLY: %s\n", intal_multiply(num1, num2));
+    if (DEBUG){
+        printf("%s\n", num1);
+        printf("%s\n", num2);
+    }*/
 }
