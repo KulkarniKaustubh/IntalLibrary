@@ -9,7 +9,6 @@ typedef struct digit {
     char val1;
     char val2;
     char fdig;
-    char leftover;
     struct digit *next;
     struct digit *prev;
 } digit;
@@ -21,6 +20,17 @@ typedef struct number {
 int greatestLength (char *str1, char *str2);
 void equalise (char **num1, char **num2);
 void insert (number *num, digit *dig);
+void freeNum (number *num);
+
+void freeNum (number *num)
+{
+    digit *temp;
+    while (num->head) {
+        temp = num->head;
+        num->head = temp->next;
+        free (temp);
+    }
+}
 
 digit* createNode (char val1, char val2)
 {
@@ -31,7 +41,6 @@ digit* createNode (char val1, char val2)
     d->next =NULL;
     d->prev = NULL;
     d->fdig = '\0';
-    d->leftover = '\0';
     return d;
 }
 
@@ -70,14 +79,6 @@ void insert (number *num, digit *dig)
     }
     dig->next = num->head;
     num->head = dig;
-    if (dig->next->leftover == '1') {
-        if (dig->fdig == '9') {
-            dig->fdig = '0';
-            dig->leftover = '1';
-        } else {
-            dig->fdig ++;
-        }
-    }
 }
 
 void displayNumber (number *num)
@@ -90,7 +91,7 @@ void displayNumber (number *num)
     printf ("\n");
 }
 
-int lenList (number *num)
+int numLen (number *num)
 {
     int len = 0;
     digit *temp = num->head;
@@ -104,26 +105,19 @@ int lenList (number *num)
 char* makeString (number *num)
 {
     digit *temp = num->head;
-    if (num->head->leftover == '1') {
-        char *str = (char*)malloc(sizeof(char)*lenList(num)+2);
-        str[0] = '1';
-        for (int i=1; i <= lenList(num); ++i) {
-            if (temp) {
-                str[i] = temp->fdig;
-                temp = temp->next;
-            }
-        }
-        str[lenList(num)+1] = '\0';
-        return str;
-    } else {
-        char *str = (char*)malloc(sizeof(char)*lenList(num)+1);
-        for (int i=0; i < lenList(num); ++i) {
-            str[i] = temp->fdig;
-            temp = temp->next;
-        }
-        str[lenList(num)] = '\0';
-        return str;
+    char *str = (char*)malloc(sizeof(char)*numLen(num)+1);
+    for (int i=0; i < numLen(num); ++i) {
+        str[i] = temp->fdig;
+        temp = temp->next;
     }
+    str[numLen(num)] = '\0';
+    while (str[0] == '0') {
+        ++str;
+    }
+    if (strlen(str) == 0) {
+        return "0\0";
+    }
+    return str;
 }
 
 char* intal_add (char *intal_1, char *intal_2)
@@ -143,17 +137,95 @@ char* intal_add (char *intal_1, char *intal_2)
 
     number num;
     num.head = NULL;
+    int carryFlag = 0;
 
     for (int i=max-1; i >= 0; --i) {
         digit *temp = createNode(intal_1[i], intal_2[i]);
         int v1 = temp->val1-'0';
+        if (carryFlag)
+            v1 += 1;
         int v2 = temp->val2-'0';
         int sum = v1 + v2;
         temp->fdig = (char)((sum%10)+'0');
-        temp->leftover = (char)((sum/10)+'0');
+        if (sum >= 10) {
+            carryFlag = 1;
+        } else {
+            carryFlag = 0;
+        }
+        // temp->leftover = (char)((sum/10)+'0');
+        insert(&num, temp);
+    }
+    if (carryFlag) {
+        digit *temp = createNode('\0', '\0');
+        temp->fdig = '1';
+        insert (&num, temp);
+    }
+    char *str;
+    str = makeString(&num);
+    freeNum(&num);
+    return str;
+}
+
+char* intal_diff (char *intal_1, char *intal_2)
+{
+    int isEq = intal_compare(intal_1, intal_2);
+    if (isEq == -1) {
+        char *temp = intal_1;
+        intal_1 = intal_2;
+        intal_2 = temp;
+    }
+    equalise(&intal_1, &intal_2);
+
+    if (DEBUG) {
+        printf ("%s\n", intal_1);
+        printf ("%s\n", intal_2);
+    }
+
+    int max = greatestLength(intal_1, intal_2);
+
+    if (DEBUG) {
+        printf ("%d\n", max);
+    }
+
+    number num;
+    num.head = NULL;
+    int carryFlag = 0;
+    for (int i=max-1; i >= 0; --i) {
+        digit *temp = createNode(intal_1[i], intal_2[i]);
+        int v1 = temp->val1-'0';
+        if (carryFlag)
+            v1 -= 1;
+        int v2 = temp->val2-'0';
+        int diff = v1 - v2;
+        if (diff<0) {
+            carryFlag = 1;
+            v1 = v1+10;
+            diff = v1 - v2;
+        } else {
+            carryFlag = 0;
+        }
+        temp->fdig = (char)((diff)+'0');
         insert(&num, temp);
     }
     char *str;
     str = makeString(&num);
+    freeNum(&num);
     return str;
+}
+
+int intal_compare (char *intal_1, char *intal_2)
+{
+    equalise (&intal_1, &intal_2);
+    int max = greatestLength(intal_1, intal_2);
+
+    for (int i=0; i < max; i++) {
+        if (intal_1[i] < intal_2[i]) {
+            return -1;
+        } else if (intal_1[i] > intal_2[i]) {
+            return 1;
+        } else {
+            continue;
+        }
+    }
+    return 0;
 }

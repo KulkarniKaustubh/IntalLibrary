@@ -3,13 +3,12 @@
 #include <stdio.h>
 // #include "intal.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 typedef struct digit {
     char val1;
     char val2;
     char fdig;
-    char leftover;
     struct digit *next;
     struct digit *prev;
 } digit;
@@ -42,7 +41,6 @@ digit* createNode (char val1, char val2)
     d->next =NULL;
     d->prev = NULL;
     d->fdig = '\0';
-    d->leftover = '\0';
     return d;
 }
 
@@ -81,14 +79,6 @@ void insert (number *num, digit *dig)
     }
     dig->next = num->head;
     num->head = dig;
-    // if (dig->next->leftover == '1') {
-    //     if (dig->fdig == '9') {
-    //         dig->fdig = '0';
-    //         dig->leftover = '1';
-    //     } else {
-    //         dig->fdig ++;
-    //     }
-    // }
 }
 
 void displayNumber (number *num)
@@ -123,6 +113,9 @@ char* makeString (number *num)
     str[numLen(num)] = '\0';
     while (str[0] == '0') {
         ++str;
+    }
+    if (strlen(str) == 0) {
+        return "0\0";
     }
     return str;
 }
@@ -173,9 +166,14 @@ char* intal_add (char *intal_1, char *intal_2)
     return str;
 }
 
-#if 0
-char* intal_diff (char *inal_1, char *intal_2)
+char* intal_diff (char *intal_1, char *intal_2)
 {
+    int isEq = intal_compare(intal_1, intal_2);
+    if (isEq == -1) {
+        char *temp = intal_1;
+        intal_1 = intal_2;
+        intal_2 = temp;
+    }
     equalise(&intal_1, &intal_2);
 
     if (DEBUG) {
@@ -195,12 +193,16 @@ char* intal_diff (char *inal_1, char *intal_2)
     for (int i=max-1; i >= 0; --i) {
         digit *temp = createNode(intal_1[i], intal_2[i]);
         int v1 = temp->val1-'0';
+        if (carryFlag)
+            v1 -= 1;
         int v2 = temp->val2-'0';
         int diff = v1 - v2;
         if (diff<0) {
             carryFlag = 1;
-            v1 = v1*10;
+            v1 = v1+10;
             diff = v1 - v2;
+        } else {
+            carryFlag = 0;
         }
         temp->fdig = (char)((diff)+'0');
         insert(&num, temp);
@@ -210,7 +212,23 @@ char* intal_diff (char *inal_1, char *intal_2)
     freeNum(&num);
     return str;
 }
-#endif
+
+int intal_compare (char *intal_1, char *intal_2)
+{
+    equalise (&intal_1, &intal_2);
+    int max = greatestLength(intal_1, intal_2);
+
+    for (int i=0; i < max; i++) {
+        if (intal_1[i] < intal_2[i]) {
+            return -1;
+        } else if (intal_1[i] > intal_2[i]) {
+            return 1;
+        } else {
+            continue;
+        }
+    }
+    return 0;
+}
 
 int main()
 {
@@ -221,4 +239,6 @@ int main()
     scanf("%s", num2);
 
     printf ("%s\n", intal_add(num1, num2));
+    printf ("%s\n", intal_diff(num1, num2));
+    printf ("%d\n", intal_compare(num1, num2));
 }
