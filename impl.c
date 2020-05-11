@@ -18,7 +18,7 @@ typedef struct number {
     digit *head;
 } number;
 
-int greatest (char *str1, char *str2);
+int greatestLength (char *str1, char *str2);
 void equalise (char **num1, char **num2);
 void insert (number *num, digit *dig);
 
@@ -26,15 +26,12 @@ digit* createNode (char val1, char val2)
 {
     digit *d;
     d = (digit*)malloc(sizeof(digit));
-    int v1 = val1-'0';
-    int v2 = val2-'0';
-    int sum = v1 + v2;
     d->val1 = val1;
     d->val2 = val2;
     d->next =NULL;
     d->prev = NULL;
-    d->fdig = (char)((sum%10)+'0');
-    d->leftover = (char)((sum/10)+'0');
+    d->fdig = '\0';
+    d->leftover = '\0';
     return d;
 }
 
@@ -42,7 +39,7 @@ void equalise (char **num1, char **num2)
 {
     int len1 = strlen(*num1);
     int len2 = strlen(*num2);
-    int max = greatest(*num1, *num2);
+    int max = greatestLength(*num1, *num2);
     if (len1 == len2)
         return;
 
@@ -60,7 +57,7 @@ void equalise (char **num1, char **num2)
     }
 }
 
-int greatest (char *str1, char *str2)
+int greatestLength (char *str1, char *str2)
 {
     return (strlen(str1) > strlen(str2)) ? strlen(str1) : strlen(str2);
 }
@@ -138,7 +135,7 @@ char* intal_add (char *intal_1, char *intal_2)
         printf ("%s\n", intal_2);
     }
 
-    int max = greatest(intal_1, intal_2);
+    int max = greatestLength(intal_1, intal_2);
 
     if (DEBUG) {
         printf ("%d\n", max);
@@ -149,12 +146,14 @@ char* intal_add (char *intal_1, char *intal_2)
 
     for (int i=max-1; i >= 0; --i) {
         digit *temp = createNode(intal_1[i], intal_2[i]);
+        int v1 = temp->val1-'0';
+        int v2 = temp->val2-'0';
+        int sum = v1 + v2;
+        temp->fdig = (char)((sum%10)+'0');
+        temp->leftover = (char)((sum/10)+'0');
         insert(&num, temp);
     }
     char *str;
     str = makeString(&num);
-    if (str[0] == '0')
-        return str+1;
-    else
-        return str;
+    return str;
 }
