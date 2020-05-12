@@ -52,8 +52,6 @@ void equalise (char *num1, char *num2, char **temp1, char **temp2)
     int len2 = strlen(num2);
     *temp1 = num1;
     *temp2 = num2;
-    if (len1 == len2)
-        return;
 
     while (*temp1[0] == '0') {
         ++*temp1;
@@ -61,21 +59,29 @@ void equalise (char *num1, char *num2, char **temp1, char **temp2)
     while (*temp2[0] == '0') {
         ++*temp2;
     }
+
     len1 = strlen(*temp1);
     len2 = strlen(*temp2);
+    if (len1 == len2)
+        return;
+
     int max = greatestLength(*temp1, *temp2);
+    char *str1 = (char*)calloc(max+1, sizeof(char));
+    char *str2 = (char*)calloc(max+1, sizeof(char));
+
+    memset (str1, '0', max);
+    memset (str2, '0', max);
 
     if (len1 > len2) {
-        for (int i=0; i < (len1-len2); ++i) {
-            --*temp2;
-            **temp2 = '0';
-        }
+        strcpy (str2 + (len1-len2), *temp2);
+        strcpy (str1, *temp1);
     } else {
-        for (int i=0; i < (len2-len1); ++i) {
-            --*temp1;
-            **temp1 = '0';
-        }
+        strcpy (str1 + (len2-len1), *temp1);
+        strcpy (str2, *temp2);
     }
+    
+    *temp1 = str1;
+    *temp2 = str2;
 }
 
 int greatestLength (char *str1, char *str2)
@@ -132,12 +138,10 @@ char* makeString (number *num)
     return str;
 }
 
-char* intal_add (char *intal1, char *intal2)
+char* Add(char *num1, char *num2)
 {
-    char *num1, *num2;
-    equalise(intal1, intal2, &num1, &num2);
-
     if (DEBUG) {
+        printf ("add:\n");
         printf ("%s\n", num1);
         printf ("%s\n", num2);
     }
@@ -175,6 +179,17 @@ char* intal_add (char *intal1, char *intal2)
     return str;
 }
 
+char* intal_add (char *intal1, char *intal2)
+{
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+
+    char *str = Add(num1, num2);
+    free (num1);
+    free (num2);
+    return str;
+}
+
 char* intal_diff (char *intal1, char *intal2)
 {
     int isEq = intal_compare(intal1, intal2);
@@ -187,6 +202,7 @@ char* intal_diff (char *intal1, char *intal2)
     equalise(intal1, intal2, &num1, &num2);
 
     if (DEBUG) {
+        printf ("diff:\n");
         printf ("%s\n", num1);
         printf ("%s\n", num2);
     }
@@ -221,6 +237,8 @@ char* intal_diff (char *intal1, char *intal2)
     char *str;
     str = makeString(&num);
     freeNum(&num);
+    // free(num1);
+    // free(num2);
     return str;
 }
 
@@ -228,7 +246,7 @@ int intal_compare (char *intal1, char *intal2)
 {
     char *num1, *num2;
     equalise(intal1, intal2, &num1, &num2);
-    int max = greatestLength(intal1, intal2);
+    int max = greatestLength(num1, num2);
 
     for (int i=0; i < max; i++) {
         if (num1[i] < num2[i]) {
@@ -239,18 +257,21 @@ int intal_compare (char *intal1, char *intal2)
             continue;
         }
     }
+    // free(num1);
+    // free(num2);
     return 0;
 }
 
 char* intal_multiply (char *intal1, char *intal2)
 {
-    if (strlen(intal1) < strlen(intal2)) {
-        char *temp = intal1;
-        intal1 = intal2;
-        intal2 = temp;
-    }
     char *num1, *num2;
     equalise(intal1, intal2, &num1, &num2);
+    int isEq = intal_compare(num1, num2);
+    if (isEq == -1) {
+        char *temp = num1;
+        num1 = num2;
+        num2 = temp;
+    }
     int leastLen = strlen(num2);
     int max = greatestLength(num1, num2);
     number num[leastLen];
@@ -304,7 +325,32 @@ char* intal_multiply (char *intal1, char *intal2)
         fnum = intal_add(fnum, makeString(&num[i]));
         freeNum(&num[i]);
     }
+    // free(num1);
+    // free(num2);
     return fnum;
+}
+
+/*char* intal_divide (char *intal1, char *intal2)
+{
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+}*/
+
+char* intal_mod (char *intal1, char *intal2)
+{
+    if (intal_compare(intal1, intal2) == 0) {
+        return "0\0";
+    } else if (intal_compare(intal1, intal2) == -1) {
+        return intal1;
+    }
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+    char *incr = (char*)malloc(sizeof(char)*strlen(num1));
+    incr[0] = '1';
+    /*while (intal_compare(incr, num2)) {
+
+    }*/
+
 }
 
 int main()
@@ -318,23 +364,38 @@ int main()
 
     printf ("ADD: %s\n", intal_add(num1, num2));
     if (DEBUG){
+        printf ("main:\n");
         printf("%s\n", num1);
         printf("%s\n", num2);
+        printf ("end.\n");
     }
 
-    printf ("DIFF: %s\n", intal_diff(num1, num2));
-    if (DEBUG){
-        printf("%s\n", num1);
-        printf("%s\n", num2);
-    }
-    printf ("COMPARE: %d\n", intal_compare(num1, num2));
-    if (DEBUG){
-        printf("%s\n", num1);
-        printf("%s\n", num2);
-    }
-    printf ("MULTIPLY: %s\n", intal_multiply(num1, num2));
-    if (DEBUG){
-        printf("%s\n", num1);
-        printf("%s\n", num2);
-    }
+    // printf ("DIFF: %s\n", intal_diff(num1, num2));
+    // if (DEBUG){
+    //     printf ("main:\n");
+    //     printf("%s\n", num1);
+    //     printf("%s\n", num2);
+    //     printf ("end.\n");
+    // }
+    // printf ("COMPARE: %d\n", intal_compare(num1, num2));
+    // if (DEBUG){
+    //     printf ("main:\n");
+    //     printf("%s\n", num1);
+    //     printf("%s\n", num2);
+    //     printf ("end.\n");
+    // }
+    // printf ("MULTIPLY: %s\n", intal_multiply(num1, num2));
+    // if (DEBUG){
+    //     printf ("main:\n");
+    //     printf("%s\n", num1);
+    //     printf("%s\n", num2);
+    //     printf ("end.\n");
+    // }
+    // printf ("MOD: %s\n", intal_mod(num1, num2));
+    // if (DEBUG){
+    //     printf ("main:\n");
+    //     printf("%s\n", num1);
+    //     printf("%s\n", num2);
+    //     printf ("end.\n");
+    // }
 }
