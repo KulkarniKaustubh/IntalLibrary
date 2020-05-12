@@ -57,15 +57,12 @@ char* intal_mod (char *intal1, char *intal2)
         return "0\0";
     } else if (intal_compare(intal1, intal2) == -1) {
         return intal1;
+    } else if (intal_compare("1", intal2) == 0) {
+        return "0\0";
     }
-    char *num1, *num2;
-    equalise(intal1, intal2, &num1, &num2);
-    char *incr = (char*)malloc(sizeof(char)*strlen(num1));
-    incr[0] = '1';
-    /*while (intal_compare(incr, num2)) {
 
-    }*/
-
+    char *str = Mod (intal1, intal2);
+    return str;
 }
 
 int main()
@@ -76,6 +73,9 @@ int main()
 
     scanf("%s", num1);
     scanf("%s", num2);
+
+    printf ("length 1 : %ld\n", strlen(num1));
+    printf ("length 2 : %ld\n", strlen(num2));
 
     printf ("ADD: %s\n", intal_add(num1, num2));
     if (DEBUG){
