@@ -52,8 +52,6 @@ void equalise (char *num1, char *num2, char **temp1, char **temp2)
     int len2 = strlen(num2);
     *temp1 = num1;
     *temp2 = num2;
-    if (len1 == len2)
-        return;
 
     while (*temp1[0] == '0') {
         ++*temp1;
@@ -61,21 +59,33 @@ void equalise (char *num1, char *num2, char **temp1, char **temp2)
     while (*temp2[0] == '0') {
         ++*temp2;
     }
+
     len1 = strlen(*temp1);
     len2 = strlen(*temp2);
+
     int max = greatestLength(*temp1, *temp2);
+    char *str1 = (char*)calloc(max+1, sizeof(char));
+    char *str2 = (char*)calloc(max+1, sizeof(char));
+
+    memset (str1, '0', max);
+    memset (str2, '0', max);
 
     if (len1 > len2) {
-        for (int i=0; i < (len1-len2); ++i) {
-            --*temp2;
-            **temp2 = '0';
-        }
+        strcpy (str2 + (len1-len2), *temp2);
+        strcpy (str1, *temp1);
+    } else if (len2 > len1) {
+        strcpy (str1 + (len2-len1), *temp1);
+        strcpy (str2, *temp2);
     } else {
-        for (int i=0; i < (len2-len1); ++i) {
-            --*temp1;
-            **temp1 = '0';
-        }
+        strcpy (str1, *temp1);
+        strcpy (str2, *temp2);
     }
+
+    str1[max] = '\0';
+    str2[max] = '\0';
+
+    *temp1 = str1;
+    *temp2 = str2;
 }
 
 int greatestLength (char *str1, char *str2)
@@ -132,12 +142,10 @@ char* makeString (number *num)
     return str;
 }
 
-char* intal_add (char *intal1, char *intal2)
+char* Add(char *num1, char *num2)
 {
-    char *num1, *num2;
-    equalise(intal1, intal2, &num1, &num2);
-
     if (DEBUG) {
+        printf ("add:\n");
         printf ("%s\n", num1);
         printf ("%s\n", num2);
     }
@@ -175,18 +183,18 @@ char* intal_add (char *intal1, char *intal2)
     return str;
 }
 
-char* intal_diff (char *intal1, char *intal2)
+char* Diff (char *num1, char *num2)
 {
-    int isEq = intal_compare(intal1, intal2);
+    int isEq = intal_compare(num1, num2);
     if (isEq == -1) {
-        char *temp = intal1;
-        intal1 = intal2;
-        intal2 = temp;
+        char *temp = num1;
+        num1 = num2;
+        num2 = temp;
     }
-    char *num1, *num2;
-    equalise(intal1, intal2, &num1, &num2);
+
 
     if (DEBUG) {
+        printf ("diff:\n");
         printf ("%s\n", num1);
         printf ("%s\n", num2);
     }
@@ -224,11 +232,9 @@ char* intal_diff (char *intal1, char *intal2)
     return str;
 }
 
-int intal_compare (char *intal1, char *intal2)
+int Compare (char *num1, char *num2)
 {
-    char *num1, *num2;
-    equalise(intal1, intal2, &num1, &num2);
-    int max = greatestLength(intal1, intal2);
+    int max = greatestLength(num1, num2);
 
     for (int i=0; i < max; i++) {
         if (num1[i] < num2[i]) {
@@ -242,15 +248,14 @@ int intal_compare (char *intal1, char *intal2)
     return 0;
 }
 
-char* intal_multiply (char *intal1, char *intal2)
+char* Multiply (char *num1, char *num2)
 {
-    if (strlen(intal1) < strlen(intal2)) {
-        char *temp = intal1;
-        intal1 = intal2;
-        intal2 = temp;
+    int isEq = intal_compare(num1, num2);
+    if (isEq == -1) {
+        char *temp = num1;
+        num1 = num2;
+        num2 = temp;
     }
-    char *num1, *num2;
-    equalise(intal1, intal2, &num1, &num2);
     int leastLen = strlen(num2);
     int max = greatestLength(num1, num2);
     number num[leastLen];
@@ -301,8 +306,109 @@ char* intal_multiply (char *intal1, char *intal2)
     freeNum(&num[0]);
 
     for (int i=1; i < leastLen; ++i) {
-        fnum = intal_add(fnum, makeString(&num[i]));
+        char *temp = makeString(&num[i]);
+        char *n1, *n2;
+        equalise (fnum, temp, &n1, &n2);
+        fnum = Add(n1, n2);
         freeNum(&num[i]);
     }
     return fnum;
+}
+
+char* Mod (char *num1, char *num2)
+{
+    char *n1 = num1;
+    char *n2 = num2;
+    int len2 = strlen(n2);
+    char *val;
+
+    while (intal_compare(n1, num2) > 0) {
+        int len1 = strlen(n1);
+        int power = (len1 - len2) - 1;
+
+        if (power < 0) {
+            n1 = intal_diff(n1, num2);
+            break;
+        } else if (power == 0) {
+            n2 = num2;
+        } else {
+            n2 = num2;
+            for (int i=0; i < power; ++i)
+                n2 = intal_multiply(n2, "10\0");
+        }
+
+        val = n2;
+
+        while (intal_compare(n1, n2) > 0) {
+            n2 = intal_add(n2, val);
+            if (intal_compare(n1, n2) == 0)
+                return "0\0";
+        }
+        n2 = intal_diff (n2, val);
+        n1 = intal_diff (n1, n2);
+    }
+
+    char *str = (char*)malloc(sizeof(char));
+    strcpy (str, n1);
+    return str;
+}
+
+char* intal_add (char *intal1, char *intal2)
+{
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+
+    char *str = Add(num1, num2);
+    free (num1);
+    free (num2);
+    return str;
+}
+
+char* intal_diff (char *intal1, char *intal2)
+{
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+
+    char *str = Diff(num1, num2);
+    free (num1);
+    free (num2);
+    return str;
+}
+
+int intal_compare (char *intal1, char *intal2)
+{
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+
+    int cmp = Compare(num1, num2);
+
+    free (num1);
+    free (num2);
+
+    return cmp;
+}
+
+char* intal_multiply (char *intal1, char *intal2)
+{
+    char *num1, *num2;
+    equalise(intal1, intal2, &num1, &num2);
+
+    char *str = Multiply(num1, num2);
+    free (num1);
+    free (num2);
+    return str;
+}
+
+char* intal_mod (char *intal1, char *intal2)
+{
+    if (intal_compare(intal1, intal2) == 0) {
+        return "0\0";
+    } else if (intal_compare(intal1, intal2) == -1) {
+        return intal1;
+    } else if (intal_compare("1", intal2) == 0) {
+        return "0\0";
+    }
+
+    char *str = Mod (intal1, intal2);
+    return str;
 }
