@@ -32,8 +32,8 @@ void equalise (char *num1, char *num2, int l)
     int l1 = strlen(num1);
     int l2 = strlen(num2);
 
-    char *ptr1 = (char*)calloc(l+1, sizeof(char));
-    char *ptr2 = (char*)calloc(l+1, sizeof(char));
+    char *ptr1 = (char*)calloc(1000, sizeof(char));
+    char *ptr2 = (char*)calloc(1000, sizeof(char));
     memset (ptr1, '0', l+1);
     memset (ptr2, '0', l+1);
 
@@ -67,7 +67,9 @@ void equalise (char *num1, char *num2, int l)
 
 int greatestLength (const char *intal1, const char *intal2)
 {
-    return strlen(intal1)>strlen(intal2)? strlen(intal1) : strlen(intal2);
+    int l1 = strlen(intal1);
+    int l2 = strlen(intal2);
+    return l1>l2? l1 : l2;
 }
 
 void insert (number *num, digit *dig)
@@ -113,7 +115,11 @@ void displayNumber (number num)
 
 char* stripZeroes (char *str)
 {
-    char *str2 = (char*)calloc(strlen(str)+1, sizeof(char));
+    if (str == NULL) {
+        return NULL;
+    }
+    int len = strlen(str);
+    char *str2 = (char*)calloc(1000, sizeof(char));
     char *ptr = str;
     while (ptr[0] == '0') {
         ++ptr;
@@ -121,9 +127,12 @@ char* stripZeroes (char *str)
     if (strlen(ptr) == 0) {
         --ptr;
     }
+
     strcpy (str2, ptr);
     strcpy (str, str2);
+
     free (str2);
+
     return str;
 }
 
@@ -131,8 +140,8 @@ char* Add (const char *intal1, const char *intal2, char *str)
 {
     int len = greatestLength (intal1, intal2);
 
-    char *num1 = (char*)calloc(len+1, sizeof(char));
-    char *num2 = (char*)calloc(len+1, sizeof(char));
+    char *num1 = (char*)calloc(1000, sizeof(char));
+    char *num2 = (char*)calloc(1000, sizeof(char));
 
     strcpy (num1, intal1);
     strcpy (num2, intal2);
@@ -180,8 +189,8 @@ char* Diff (const char *intal1, const char *intal2, char *str)
 {
     int len = greatestLength (intal1, intal2);
 
-    char *num1 = (char*)calloc(len+1, sizeof(char));
-    char *num2 = (char*)calloc(len+1, sizeof(char));
+    char *num1 = (char*)calloc(1000, sizeof(char));
+    char *num2 = (char*)calloc(1000, sizeof(char));
 
     strcpy (num1, intal1);
     strcpy (num2, intal2);
@@ -234,8 +243,8 @@ int Compare (const char *intal1, const char *intal2)
 {
     int len = greatestLength (intal1, intal2);
 
-    char *num1 = (char*)calloc(len+1, sizeof(char));
-    char *num2 = (char*)calloc(len+1, sizeof(char));
+    char *num1 = (char*)calloc(1000, sizeof(char));
+    char *num2 = (char*)calloc(1000, sizeof(char));
 
     strcpy (num1, intal1);
     strcpy (num2, intal2);
@@ -265,8 +274,8 @@ char* Multiply (const char *intal1, const char *intal2, char *fnum)
 {
     int len = greatestLength (intal1, intal2);
 
-    char *num1 = (char*)calloc(len+1, sizeof(char));
-    char *num2 = (char*)calloc(len+1, sizeof(char));
+    char *num1 = (char*)calloc(1000, sizeof(char));
+    char *num2 = (char*)calloc(1000, sizeof(char));
 
     strcpy (num1, intal1);
     strcpy (num2, intal2);
@@ -387,8 +396,8 @@ char* Mod (const char *intal1, const char *intal2, char *str)
 {
     int len = greatestLength (intal1, intal2);
 
-    char *num1 = (char*)calloc(len+1, sizeof(char));
-    char *num2 = (char*)calloc(len+1, sizeof(char));
+    char *num1 = (char*)calloc(1000, sizeof(char));
+    char *num2 = (char*)calloc(1000, sizeof(char));
 
     strcpy (num1, intal1);
     strcpy (num2, intal2);
@@ -454,6 +463,11 @@ char* Mod (const char *intal1, const char *intal2, char *str)
             n2 = stripZeroes(n2);
             if (Compare(n1, n2) == 0) {
                 strcpy (str, "0");
+                free (val);
+                free (n1);
+                free (n2);
+                free (num1);
+                free (num2);
                 return str;
             }
         }
@@ -470,6 +484,67 @@ char* Mod (const char *intal1, const char *intal2, char *str)
     free (n2);
     free (num1);
     free (num2);
+
+    return str;
+}
+
+char* divideByTwo (char *str)
+{
+    int len = strlen(str);
+    char *res = (char*)calloc(1000, sizeof(char));
+
+    int carryFlag = 0;
+
+    for (int i=0; i<len; ++i) {
+        int val = (10*carryFlag) + (str[i]-'0');
+        int fval;
+        if (val >= 2) {
+            fval = val/2;
+            carryFlag = val%2;
+        } else {
+            fval = 0;
+            carryFlag = val;
+        }
+        res[i] = (char)((fval)+'0');
+    }
+
+    strcpy (str, res);
+
+    free (res);
+
+    return str;
+}
+
+char* Pow (const char *intal1, unsigned int n, char *str)
+{
+    char *num1 = (char*)calloc(1000, sizeof(char));
+
+    strcpy (num1, intal1);
+
+    num1 = stripZeroes(num1);
+
+    char *res = (char*)calloc(1000, sizeof(char));
+    strcpy (res, "1");
+
+    while (n > 0) {
+        if (n & 1) {
+            res = Multiply(res, num1, res);
+            res = stripZeroes(res);
+        }
+
+        // num2 = divideByTwo(num2);
+        // num2 = stripZeroes(num2);
+        // n = n/2;
+        n = n >> 1;
+        num1 = Multiply(num1, num1, num1);
+        num1 = stripZeroes(num1);
+    }
+
+    strcpy(str, res);
+
+    free (res);
+    free (num1);
+    // free (num2);
 
     return str;
 }

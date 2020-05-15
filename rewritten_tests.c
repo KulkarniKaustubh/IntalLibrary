@@ -44,6 +44,14 @@ char* intal_mod (const char *intal1, const char *intal2)
     return str;
 }
 
+char* intal_pow (const char *intal1, unsigned int n)
+{
+    char *str = (char*)calloc(1000, sizeof(char));
+    str = Pow(intal1, n, str);
+    str = stripZeroes(str);
+    return str;
+}
+
 int main ()
 {
     char num1[1000];
@@ -102,6 +110,19 @@ int main ()
 
     ans = intal_mod(num1, num2);
     printf ("MOD: %s\n", ans);
+    if (DEBUG){
+        printf ("main:\n");
+        printf("%s\n", num1);
+        printf("%s\n", num2);
+        printf ("end.\n");
+    }
+    free (ans);
+
+    printf ("power : ");
+    int n;
+    scanf ("%d", &n);
+    ans = intal_pow(num1, n);
+    printf ("POW: %s\n", ans);
     if (DEBUG){
         printf ("main:\n");
         printf("%s\n", num1);
