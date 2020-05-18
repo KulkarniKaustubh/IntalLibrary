@@ -433,7 +433,8 @@ char* Multiply (const char *intal1, const char *intal2)//, char *fnum)
             int v1 = n1[j]-'0';
             int v2 = n2[i]-'0';
             if (v1 == 0 || v2 == 0) {
-                temp->fdig = '0';
+                temp->fdig = (char)((carryFlag)+'0');
+                carryFlag = 0;
                 insert(&num[iter], temp);
                 if (DEBUG) {
                     printf ("inside v1 or v2 0\n");
@@ -670,6 +671,7 @@ char* Pow (const char *intal1, unsigned int n)
         // n = n >> 1;
         tempnum = Multiply(num, num);//, num1);
         reAssign(&num, &tempnum);
+
         stripZeroes(num);
     }
 
