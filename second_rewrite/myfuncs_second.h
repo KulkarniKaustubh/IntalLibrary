@@ -512,6 +512,23 @@ char* Mod (const char *intal1, const char *intal2)
     int l1 = strlen(intal1);
     int l2 = strlen(intal2);
 
+    char *mod = (char*)calloc(l2+1, sizeof(char));
+
+    if (Compare(intal1, intal2) == 0 || Compare("1", intal2) == 0 || Compare("0", intal1) == 0) {
+        strncpy (mod, "0", 2);
+    } else if (Compare(intal1, intal2) == -1) {
+        strncpy (mod, intal1, strlen(intal1)+1);
+    } else if (Compare("0", intal2) == 0) {
+        int err_len = strlen("Divided by 0 error");
+        mod = (char*)realloc(mod, err_len+1);
+        strncpy (mod, "Divided by 0 error", err_len+1);
+    }
+
+    if (strlen(mod)) {
+        return mod;
+    }
+
+
     char *num1 = (char*)calloc(len+1, sizeof(char));
     char *num2 = (char*)calloc(len+1, sizeof(char));
     // num1[strlen(intal1)] = num2[strlen(intal2)] = '\0';
@@ -543,23 +560,6 @@ char* Mod (const char *intal1, const char *intal2)
     stripZeroes(n2); // since we are going to be working with no of digits
 
     // below, it is l2+1 since mod can at max be intal2
-    char *mod = (char*)calloc(l2+1, sizeof(char));
-
-    if (Compare(n1, n2) == 0 || Compare("1", n2) == 0 || Compare("0", n1) == 0) {
-        strncpy (mod, "0", 2);
-    } else if (Compare(n1, n2) == -1) {
-        strncpy (mod, n1, len1+1);
-    } else if (Compare("0", n2) == 0) {
-        int err_len = strlen("Divided by 0 error");
-        mod = (char*)realloc(mod, err_len+1);
-        strncpy (mod, "Divided by 0 error", err_len+1);
-    }
-
-    if (strlen(mod)) {
-        free (n1);
-        free (n2);
-        return mod;
-    }
 
     int len2 = strlen(n2);
 
@@ -678,4 +678,174 @@ char* Pow (const char *intal1, unsigned int n)
     free (num);
 
     return res;
+}
+
+char* GCD (const char *intal1, const char *intal2)
+{
+    int len = greatestLength(intal1, intal2);
+
+    char *num1 = (char*)calloc(len+1, sizeof(char));
+    char *num2 = (char*)calloc(len+1, sizeof(char));
+    // num1[strlen(intal1)] = num2[strlen(intal2)] = '\0';
+    strncpy (num1, intal1, strlen(intal1)+1);
+    strncpy (num2, intal2, strlen(intal2)+1);
+
+    stripZeroes(num1);
+    stripZeroes(num2);
+    prependZeroes(num1, num2);
+
+    int l = strlen(num1); // l only since at this point the lengths are equal
+
+    char *n1 = (char*)calloc(l+1+1, sizeof(char)); // +1+1 in case of carry
+    char *n2 = (char*)calloc(l+1+1, sizeof(char));
+    n1[l+1] = n2[l+1] = '\0';
+    strncpy (n1, num1, l+1);
+    strncpy (n2, num2, l+1);
+
+    free (num1);
+    free (num2);
+
+    char *res = (char*)calloc(len+1, sizeof(char));
+
+    if (Compare("0", intal1) == 0) {
+        strncpy (res, intal2, strlen(intal2)+1);
+        free (n1);
+        free (n2);
+        return res;
+    } else if (Compare("0", intal1) == 0 && Compare ("0", intal2) == 0) {
+        strncpy (res, "0", 2);
+        free (n1);
+        free (n2);
+        return res;
+    } else {
+        while (Compare("0", n1) != 0) {
+            char *mod;
+            mod = Mod(n2, n1);
+            n2 = (char*)realloc(n2, strlen(n1)+1);
+            strncpy (n2, n1, strlen(n1)+1);
+            reAssign(&n1, &mod);
+        }
+    }
+
+    strncpy (res, n2, strlen(n2));
+
+    free (n1);
+    free (n2);
+
+    return res;
+}
+
+char* Fibonacci (unsigned int n)
+{
+    char *res1 = (char*)calloc(2, sizeof(char));
+    char *res2 = (char*)calloc(2, sizeof(char));
+
+    strncpy (res1, "0", 2);
+    strncpy (res2, "1", 2);
+
+    for (int i=0; i<n; ++i) {
+        // char *tempres1;
+        char *tempres2;
+        tempres2 = Add(res2, res1);
+        res1 = (char*)realloc(res1, strlen(res2)+1);
+        strncpy (res1, res2, strlen(res2)+1);
+        reAssign(&res2, &tempres2);
+    }
+
+    free (res2);
+
+    return res1;
+}
+
+char* Fact (unsigned int n)
+{
+    char *res = (char*)calloc(1+1, sizeof(char));
+    strncpy (res, "1", 2);
+
+    if (n == 0 || n == 1) {
+        return res;
+    }
+
+    char *numb = (char*)calloc(n, sizeof(char));
+
+    int num = n;
+
+    number temp;
+    temp.head = NULL;
+
+    while (num) {
+        digit *dig = createNode();
+        int r = num%10;
+        dig->fdig = (char)(r+'0');
+        num = num/10;
+        insert (&temp, dig);
+    }
+    numb = makeString(temp, numb);
+    freeNum(&temp);
+
+    while (Compare("1", numb) != 0) {
+        char *tempres;
+        char *tempnumb;
+        tempres = Multiply (numb, res);
+        reAssign(&res, &tempres);
+        tempnumb = Diff(numb, "1");
+        reAssign(&numb, &tempnumb);
+    }
+
+    free (numb);
+
+    return res;
+}
+/*
+char *BinCoeff (unsigned int n, unsigned int k)
+{
+
+}
+*/
+
+int Max (char **arr, int n)
+{
+    int index = 0;
+    char *max = (char*)calloc(strlen(arr[0])+1, sizeof(char));
+    strncpy (max, arr[0], strlen(arr[0])+1);
+
+    for (int i=1; i<n; ++i) {
+        if (Compare(max, arr[i]) == -1) {
+            max = (char*)realloc(max, strlen(arr[i])+1);
+            strncpy (max, arr[i], strlen(arr[i])+1);
+            index = i;
+        }
+    }
+    free (max);
+    return index;
+}
+
+int Min (char **arr, int n)
+{
+    int index = 0;
+    char *min = (char*)calloc(strlen(arr[0])+1, sizeof(char));
+    strncpy (min, arr[0], strlen(arr[0])+1);
+
+    for (int i=1; i<n; ++i) {
+        if (Compare(min, arr[i]) == 1) {
+            min = (char*)realloc(min, strlen(arr[i])+1);
+            strncpy (min, arr[i], strlen(arr[i])+1);
+            index = i;
+        }
+    }
+    free (min);
+    return index;
+}
+
+int Search (char **arr, int n, const char *key)
+{
+    // char *keyDup = (char*)calloc(strlen(key)+1, sizeof(char));
+    // strncpy (keyDup, key, strlen(key)+1);
+
+    for (int i=0; i<n; ++i) {
+        if (Compare(arr[i], key) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }
