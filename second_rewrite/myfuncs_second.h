@@ -92,6 +92,13 @@ char* makeString(number num, char *str)
     return str;
 }
 
+void reAssign (char **ptr1, char **ptr2)
+{
+    *ptr1 = (char*)realloc(*ptr1, strlen(*ptr2)+1);
+    strncpy (*ptr1, *ptr2, strlen(*ptr2)+1);
+    free (*ptr2);
+}
+
 int greatestLength (const char *str1, const char *str2)
 {
     int l1 = strlen(str1);
@@ -485,13 +492,188 @@ char* Multiply (const char *intal1, const char *intal2)//, char *fnum)
         }
 
         fnum = Add(prod, temp);//, fnum);
-        prod = (char*)realloc(prod, strlen(fnum)+1);
-        strncpy(prod, fnum, strlen(fnum)+1);
+        // prod = (char*)realloc(prod, strlen(fnum)+1);
+        // strncpy(prod, fnum, strlen(fnum)+1);
+        // free (fnum);
+        reAssign(&prod, &fnum);
 
         free (temp);
-        free (fnum);
         freeNum(&num[i]);
     }
 
     return prod;
+}
+
+char* Mod (const char *intal1, const char *intal2)
+{
+    int len = greatestLength(intal1, intal2);
+
+    int l1 = strlen(intal1);
+    int l2 = strlen(intal2);
+
+    char *num1 = (char*)calloc(len+1, sizeof(char));
+    char *num2 = (char*)calloc(len+1, sizeof(char));
+    // num1[strlen(intal1)] = num2[strlen(intal2)] = '\0';
+    strncpy (num1, intal1, strlen(intal1)+1);
+    strncpy (num2, intal2, strlen(intal2)+1);
+
+    stripZeroes(num1);
+    stripZeroes(num2);
+
+    if (Compare(num1, num2) < 0) {
+        char *temp = num1;
+        num1 = num2;
+        num2 = temp;
+    }
+
+    prependZeroes(num1, num2);
+
+    int len1 = strlen(num1); // l only since at this point the lengths are equal
+
+    char *n1 = (char*)calloc(len1+1+1, sizeof(char)); // +1+1 in case of carry
+    char *n2 = (char*)calloc(len1+1+1, sizeof(char));
+    n1[len1+1] = n2[len1+1] = '\0';
+    strncpy (n1, num1, len1+1);
+    strncpy (n2, num2, len1+1);
+
+    free (num1);
+    free (num2);
+
+    stripZeroes(n2); // since we are going to be working with no of digits
+
+    // below, it is l2+1 since mod can at max be intal2
+    char *mod = (char*)calloc(l2+1, sizeof(char));
+
+    if (Compare(n1, n2) == 0 || Compare("1", n2) == 0 || Compare("0", n1) == 0) {
+        strncpy (mod, "0", 2);
+    } else if (Compare(n1, n2) == -1) {
+        strncpy (mod, n1, len1+1);
+    } else if (Compare("0", n2) == 0) {
+        int err_len = strlen("Divided by 0 error");
+        mod = (char*)realloc(mod, err_len+1);
+        strncpy (mod, "Divided by 0 error", err_len+1);
+    }
+
+    if (strlen(mod)) {
+        free (n1);
+        free (n2);
+        return mod;
+    }
+
+    int len2 = strlen(n2);
+
+    num2 = (char*)calloc(len2+1, sizeof(char));
+    strncpy (num2, n2, len2+1);
+
+    while (Compare(n1, num2) > 0) {
+
+        char *tempn1;
+        char *tempn2;
+
+        len1 = strlen(n1);
+        int power = (len1 - len2) - 1;
+
+        if (power < 0) {
+            tempn1 = Diff(n1, num2);//, n1);
+            // n1 = (char*)realloc(n1, strlen(tempn1)+1);
+            // strncpy (n1, tempn1, strlen(tempn1)+1);
+            // free (tempn1);
+            reAssign(&n1, &tempn1);
+
+            stripZeroes(n1);
+
+            continue;
+        } else if (power == 0) {
+            strncpy (n2, num2, len2+1);
+        } else {
+            strncpy (n2, num2, len2+1);
+            char *zeroes = (char*)calloc(power+1, sizeof(char));
+            for (int i=0; i < power; ++i) {
+                strcat(zeroes, "0");
+            }
+            strcat (n2, zeroes);
+            free (zeroes);
+            stripZeroes(n2);
+        }
+
+        char *val = (char*)calloc(strlen(n2)+1, sizeof(char));
+        strncpy (val, n2, strlen(n2)+1);
+
+        while (Compare(n1, n2) > 0) {
+            tempn2 = Add(n2, val);//, n2);
+            // n2 = (char*)realloc(n2, strlen(tempn2)+1);
+            // strncpy (n2, tempn2, strlen(tempn2)+1);
+            // free (tempn2);
+            reAssign(&n2, &tempn2);
+
+            stripZeroes(n2);
+
+            if (Compare(n1, n2) == 0) {
+                strncpy (mod, "0", 2);
+                free (val);
+                free (n1);
+                free (n2);
+                free (num2);
+                return mod;
+            }
+        }
+        tempn2 = Diff(n2, val);//, n2);
+        // n2 = (char*)realloc(n2, strlen(tempn2)+1);
+        // strncpy (n2, tempn2, strlen(tempn2)+1);
+        // free (tempn2);
+        reAssign(&n2, &tempn2);
+
+        stripZeroes(n2);
+
+        free (val);
+
+        tempn1 = Diff(n1, n2);//, n1);
+        // n1 = (char*)realloc(n1, strlen(tempn1)+1);
+        // strncpy (n1, tempn1, strlen(tempn1)+1);
+        // free (tempn1);
+        reAssign(&n1, &tempn1);
+
+        stripZeroes(n1);
+    }
+
+    strcpy (mod, n1);
+
+    free (n1);
+    free (n2);
+    free (num2);
+
+    return mod;
+}
+
+char* Pow (const char *intal1, unsigned int n)
+{
+    char *num = (char*)calloc(strlen(intal1)+1, sizeof(char));
+    strncpy (num, intal1, strlen(intal1)+1);
+
+    stripZeroes(num);
+
+    char *res = (char*)calloc(1+1, sizeof(char)); // 2 for storing 1\0
+    strncpy (res, "1", 2);
+
+    while (n > 0) {
+        char *tempres;
+        char *tempnum;
+        if (n & 1) {
+            tempres = Multiply(res, num);//, res);
+            reAssign(&res, &tempres);
+            stripZeroes(res);
+        }
+
+        // num2 = divideByTwo(num2);
+        // num2 = stripZeroes(num2);
+        n = n/2;
+        // n = n >> 1;
+        tempnum = Multiply(num, num);//, num1);
+        reAssign(&num, &tempnum);
+        stripZeroes(num);
+    }
+
+    free (num);
+
+    return res;
 }

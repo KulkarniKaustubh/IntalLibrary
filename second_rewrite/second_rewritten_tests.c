@@ -36,21 +36,21 @@ char* intal_multiply (const char *intal1, const char *intal2)
     return str;
 }
 
-// char* intal_mod (const char *intal1, const char *intal2)
-// {
-//     char *str = (char*)calloc(2000, sizeof(char));
-//     str = Mod (intal1, intal2, str);
-//     str = stripZeroes(str);
-//     return str;
-// }
-//
-// char* intal_pow (const char *intal1, unsigned int n)
-// {
-//     char *str = (char*)calloc(2000, sizeof(char));
-//     str = Pow(intal1, n, str);
-//     str = stripZeroes(str);
-//     return str;
-// }
+char* intal_mod (const char *intal1, const char *intal2)
+{
+    char *str = Mod (intal1, intal2);
+    // str =
+    stripZeroes(str);
+    return str;
+}
+
+char* intal_pow (const char *intal1, unsigned int n)
+{
+    char *str = Pow(intal1, n);
+    // str =
+    stripZeroes(str);
+    return str;
+}
 
 int main ()
 {
@@ -111,26 +111,26 @@ int main ()
     }
     free (ans);
 
-    // ans = intal_mod(num1, num2);
-    // printf ("MOD: %s\n", ans);
-    // if (DEBUG){
-    //     printf ("main:\n");
-    //     printf("%s\n", num1);
-    //     printf("%s\n", num2);
-    //     printf ("end.\n");
-    // }
-    // free (ans);
-    //
-    // printf ("power : ");
-    // int n;
-    // scanf ("%d", &n);
-    // ans = intal_pow(num1, n);
-    // printf ("POW: %s\n", ans);
-    // if (DEBUG){
-    //     printf ("main:\n");
-    //     printf("%s\n", num1);
-    //     printf("%s\n", num2);
-    //     printf ("end.\n");
-    // }
-    // free (ans);
+    ans = intal_mod(num1, num2);
+    printf ("MOD: %s\n", ans);
+    if (DEBUG){
+        printf ("main:\n");
+        printf("%s\n", num1);
+        printf("%s\n", num2);
+        printf ("end.\n");
+    }
+    free (ans);
+
+    printf ("power : ");
+    int n;
+    scanf ("%d", &n);
+    ans = intal_pow(num1, n);
+    printf ("POW: %s\n", ans);
+    if (DEBUG){
+        printf ("main:\n");
+        printf("%s\n", num1);
+        printf("%s\n", num2);
+        printf ("end.\n");
+    }
+    free (ans);
 }
