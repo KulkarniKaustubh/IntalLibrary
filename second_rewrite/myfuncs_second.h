@@ -849,3 +849,157 @@ int Search (char **arr, int n, const char *key)
     }
     return -1;
 }
+
+void heapify (char **arr, int n, int i)
+{
+    int max = i;
+    int left = 2*i + 1;
+    int right = 2*i + 2;
+
+    if (left < n && Compare(arr[left], arr[max]) == 1) {
+        max = left;
+    }
+
+    if (right < n && Compare(arr[right], arr[max]) == 1) {
+        max = right;
+    }
+
+    if (max != i) {
+        char *temp = (char*)calloc(strlen(arr[i])+1, sizeof(char));
+        strcpy (temp, arr[i]);
+        strcpy (arr[i], arr[max]);
+        strcpy (arr[max], temp);
+        free (temp);
+        heapify (arr, n, max);
+    }
+}
+
+void heapSort (char **arr, int n)
+{
+    for (int i = ((n/2) - 1); i>=0; --i) {
+        heapify (arr, n, i);
+    }
+
+    for (int i=n-1; i>0; --i) {
+        char *temp = (char*)calloc(strlen(arr[0])+1, sizeof(char));
+        strcpy (temp, arr[0]);
+        strcpy (arr[0], arr[i]);
+        strcpy (arr[i], temp);
+        free (temp);
+        heapify (arr, i, 0);
+    }
+}
+
+int binarySearch (char **arr, int n, const char *key)
+{
+    int up = n-1;
+    int low = 0;
+    // int mid = low + (up-low)/2;
+
+    char *keyDup = (char*)calloc(strlen(key)+1, sizeof(char));
+    strncpy (keyDup, key, strlen(key)+1);
+
+    char *currNum =(char*)calloc(strlen(arr[mid])+1, sizeof(char));
+    strncpy (currNum, arr[mid], strlen(arr[mid])+1);
+
+    while (low <= up) {
+        int mid = low + (up-low)/2;
+        currNum = (char*)realloc(currNum, strlen(arr[mid])+1);
+        strncpy (currNum, arr[mid], strlen(arr[mid])+1);
+
+        if (Compare (keyDup, currNum) > 0) {
+            low = mid+1;
+
+        } else if (Compare (keyDup, currNum) < 0) {
+            up = mid-1;
+
+        } else {
+            free (currNum);
+            free (keyDup);
+            return mid;
+        }
+    }
+    free (currNum);
+    free (keyDup);
+    return -1;
+}
+
+char* greaterString (char *str1, char *str2)
+{
+    if (Compare(str1, str2) > 0) {
+        return str1;
+    } else
+        return str2;
+}
+
+char* coinRow (char **arr, int n)
+{
+    int maxLen = strlen(arr[0]);
+    for (int i=1; i<n; ++i) {
+        if (strlen(arr[i]) > maxLen) {
+            maxLen = strlen(arr[i]);
+        }
+    }
+
+    char *dp0 = (char*)calloc(maxLen+1, sizeof(char));
+    char *dp1 = (char*)calloc(maxLen+1, sizeof(char));
+    char *dp2 = (char*)calloc(maxLen+1, sizeof(char));
+    strncpy (dp0, "0", 2);
+    strncpy (dp1, arr[0], strlen(arr[0])+1);
+
+    for (int i=2; i<n+1; ++i) {
+        char *tempadd;
+        tempadd = Add (arr[i-1], dp0);
+        char *tempmax;
+        tempmax = greaterString (tempadd, dp1);
+        strcpy (dp2, tempmax);
+        free (tempadd);
+
+        strcpy (dp0, dp1);
+        strcpy (dp1, dp2);
+    }
+
+    char *res = (char*)calloc(strlen(dp2)+1, sizeof(char));
+    strncpy (res, dp2, strlen(dp2)+1);
+
+    free (dp0);
+    free (dp1);
+    free (dp2);
+
+    return res;
+}
+
+int minimum (int a, int b)
+{
+    return a>b? b : a;
+}
+
+char* binomialCoefficient (unsigned int n, unsigned int k)
+{
+    char **C = (char**)calloc(k+1, sizeof(char*));
+    for (int i=0; i<k+1; ++i) {
+        C[i] = (char*)calloc(2, sizeof(char));
+        strncpy (C[i], "0", 2);
+    }
+
+    strncpy (C[0], "1", 2);
+
+    for (int i=1; i<=n; ++i) {
+        for (int j=minimum(i, k); j>0; --j) {
+            char *tempadd;
+            tempadd = Add (C[j], C[j-1]);
+            reAssign (&C[j], &tempadd);
+        }
+    }
+
+    char *res = (char*)calloc(strlen(C[k])+1, sizeof(char));
+    strncpy (res, C[k], strlen(C[k])+1);
+
+    for (int i=0; i<k+1; ++i) {
+		free (C[i]);
+	}
+	free (C);
+
+    return res;
+
+}
