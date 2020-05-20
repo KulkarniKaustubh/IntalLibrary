@@ -140,16 +140,12 @@ static void prependZeroes (char *num1, char *num2)
         }
         strncpy (z2_ptr, num2, l2);
         strncpy (num2, z2, l+1);
-        // num2[l] = '\0';
-        // num1[l1] = '\0';
     } else if (l1 < l2) {
         for (int i=0; i < l2-l1; ++i) {
             ++z1_ptr;
         }
         strncpy (z1_ptr, num1, l1);
         strncpy (num1, z1, l+1);
-        // num1[l] = '\0';
-        // num2[l2] = '\0';
     }
 
     free (z1);
@@ -177,13 +173,12 @@ static void stripZeroes(char *str)
     free (str2);
 }
 
-static char* Add (const char *intal1, const char *intal2)//, char *str)
+static char* Add (const char *intal1, const char *intal2)
 {
     int len = greatestLength (intal1, intal2);
 
     char *num1 = (char*)calloc(len+1, sizeof(char));
     char *num2 = (char*)calloc(len+1, sizeof(char));
-    // num1[strlen(intal1)] = num2[strlen(intal2)] = '\0';
     strncpy (num1, intal1, strlen(intal1)+1);
     strncpy (num2, intal2, strlen(intal2)+1);
 
@@ -350,7 +345,7 @@ static int Compare (const char *intal1, const char *intal2)
     return retVal;
 }
 
-static char* Multiply (const char *intal1, const char *intal2)//, char *fnum)
+static char* Multiply (const char *intal1, const char *intal2)
 {
     int len = greatestLength (intal1, intal2);
 
@@ -454,10 +449,7 @@ static char* Multiply (const char *intal1, const char *intal2)//, char *fnum)
 
         temp = makeString(num[i], temp);
 
-        fnum = Add(prod, temp);//, fnum);
-        // prod = (char*)realloc(prod, strlen(fnum)+1);
-        // strncpy(prod, fnum, strlen(fnum)+1);
-        // free (fnum);
+        fnum = Add(prod, temp);
         reAssign(&prod, &fnum);
 
         free (temp);
@@ -493,7 +485,7 @@ static char* Mod (const char *intal1, const char *intal2)
 
     char *num1 = (char*)calloc(len+1, sizeof(char));
     char *num2 = (char*)calloc(len+1, sizeof(char));
-    // num1[strlen(intal1)] = num2[strlen(intal2)] = '\0';
+
     strncpy (num1, intal1, strlen(intal1)+1);
     strncpy (num2, intal2, strlen(intal2)+1);
 
@@ -537,10 +529,7 @@ static char* Mod (const char *intal1, const char *intal2)
         int power = (len1 - len2) - 1;
 
         if (power < 0) {
-            tempn1 = Diff(n1, num2);//, n1);
-            // n1 = (char*)realloc(n1, strlen(tempn1)+1);
-            // strncpy (n1, tempn1, strlen(tempn1)+1);
-            // free (tempn1);
+            tempn1 = Diff(n1, num2);
             reAssign(&n1, &tempn1);
 
             stripZeroes(n1);
@@ -551,9 +540,7 @@ static char* Mod (const char *intal1, const char *intal2)
         } else {
             strncpy (n2, num2, len2+1);
             char *zeroes = (char*)calloc(power+1, sizeof(char));
-            for (int i=0; i < power; ++i) {
-                strcat(zeroes, "0");
-            }
+            memset (zeroes, '0', power);
             strcat (n2, zeroes);
             free (zeroes);
             stripZeroes(n2);
@@ -563,10 +550,7 @@ static char* Mod (const char *intal1, const char *intal2)
         strncpy (val, n2, strlen(n2)+1);
 
         while (Compare(n1, n2) > 0) {
-            tempn2 = Add(n2, val);//, n2);
-            // n2 = (char*)realloc(n2, strlen(tempn2)+1);
-            // strncpy (n2, tempn2, strlen(tempn2)+1);
-            // free (tempn2);
+            tempn2 = Add(n2, val);
             reAssign(&n2, &tempn2);
 
             stripZeroes(n2);
@@ -580,20 +564,14 @@ static char* Mod (const char *intal1, const char *intal2)
                 return mod;
             }
         }
-        tempn2 = Diff(n2, val);//, n2);
-        // n2 = (char*)realloc(n2, strlen(tempn2)+1);
-        // strncpy (n2, tempn2, strlen(tempn2)+1);
-        // free (tempn2);
+        tempn2 = Diff(n2, val);
         reAssign(&n2, &tempn2);
 
         stripZeroes(n2);
 
         free (val);
 
-        tempn1 = Diff(n1, n2);//, n1);
-        // n1 = (char*)realloc(n1, strlen(tempn1)+1);
-        // strncpy (n1, tempn1, strlen(tempn1)+1);
-        // free (tempn1);
+        tempn1 = Diff(n1, n2);
         reAssign(&n1, &tempn1);
 
         stripZeroes(n1);
@@ -615,23 +593,22 @@ static char* Pow (const char *intal1, unsigned int n)
 
     stripZeroes(num);
 
-    char *res = (char*)calloc(1+1, sizeof(char)); // 2 for storing 1\0
+    char *res = (char*)calloc(1+1, sizeof(char)); // 2 for storing '1''\0'
     strncpy (res, "1", 2);
 
     while (n > 0) {
         char *tempres;
         char *tempnum;
         if (n & 1) {
-            tempres = Multiply(res, num);//, res);
+            tempres = Multiply(res, num);
             reAssign(&res, &tempres);
             stripZeroes(res);
         }
 
-        // num2 = divideByTwo(num2);
-        // num2 = stripZeroes(num2);
+
         n = n/2;
-        // n = n >> 1;
-        tempnum = Multiply(num, num);//, num1);
+
+        tempnum = Multiply(num, num);
         reAssign(&num, &tempnum);
 
         stripZeroes(num);
@@ -648,7 +625,7 @@ static char* GCD (const char *intal1, const char *intal2)
 
     char *num1 = (char*)calloc(len+1, sizeof(char));
     char *num2 = (char*)calloc(len+1, sizeof(char));
-    // num1[strlen(intal1)] = num2[strlen(intal2)] = '\0';
+
     strncpy (num1, intal1, strlen(intal1)+1);
     strncpy (num2, intal2, strlen(intal2)+1);
 
@@ -706,7 +683,6 @@ static char* Fibonacci (unsigned int n)
     strncpy (res2, "1", 2);
 
     for (int i=0; i<n; ++i) {
-        // char *tempres1;
         char *tempres2;
         tempres2 = Add(res2, res1);
         res1 = (char*)realloc(res1, strlen(res2)+1);
@@ -795,9 +771,6 @@ static int Min (char **arr, int n)
 
 static int Search (char **arr, int n, const char *key)
 {
-    // char *keyDup = (char*)calloc(strlen(key)+1, sizeof(char));
-    // strncpy (keyDup, key, strlen(key)+1);
-
     for (int i=0; i<n; ++i) {
         if (Compare(arr[i], key) == 0) {
             return i;
