@@ -40,7 +40,7 @@ static int binarySearch (char **arr, int n, const char *key);
 static char* greaterString (char *str1, char *str2);
 static char* coinRow (char **arr, int n);
 static int minimum (int a, int b);
-static char* binomialCoefficient (unsigned int n, unsigned int k);
+static char* binaryCoefficient (unsigned int n, unsigned int k);
 
 static void freeNum (number *num)
 {
@@ -854,6 +854,8 @@ static int binarySearch (char **arr, int n, const char *key)
     int low = 0;
     int mid = low + (up-low)/2;
 
+    int index = -1;
+
     char *keyDup = (char*)calloc(strlen(key)+1, sizeof(char));
     strncpy (keyDup, key, strlen(key)+1);
 
@@ -872,14 +874,13 @@ static int binarySearch (char **arr, int n, const char *key)
             up = mid-1;
 
         } else if (Compare(keyDup, currNum) == 0) {
-            free (currNum);
-            free (keyDup);
-            return mid;
+            index = mid;
+            up = mid-1;
         }
     }
     free (currNum);
     free (keyDup);
-    return -1;
+    return index;
 }
 
 static char* greaterString (char *str1, char *str2)
@@ -933,7 +934,7 @@ static int minimum (int a, int b)
     return a>b? b : a;
 }
 
-static char* binomialCoefficient (unsigned int n, unsigned int k)
+static char* binaryCoefficient (unsigned int n, unsigned int k)
 {
     char **C = (char**)calloc(k+1, sizeof(char*));
     for (int i=0; i<k+1; ++i) {
@@ -1059,10 +1060,15 @@ char* coin_row_problem (char **arr, int n)
 
 char* intal_bincoeff (unsigned int n, unsigned int k)
 {
+    if (k>n) {
+        char *str = (char*)calloc(2, sizeof(char));
+        strncpy (str, "0", 2);
+        return str;
+    }
     if (k > n/2) {
         k = n-k;
     }
 
-    char *str = binomialCoefficient (n, k);
+    char *str = binaryCoefficient (n, k);
     return str;
 }
