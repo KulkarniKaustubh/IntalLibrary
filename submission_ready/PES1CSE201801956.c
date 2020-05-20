@@ -1060,7 +1060,7 @@ char* coin_row_problem (char **arr, int n)
 
 char* intal_bincoeff (unsigned int n, unsigned int k)
 {
-    if (k>n) {
+    if (k>n || n==0) {
         char *str = (char*)calloc(2, sizeof(char));
         strncpy (str, "0", 2);
         return str;
