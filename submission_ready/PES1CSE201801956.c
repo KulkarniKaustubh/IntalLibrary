@@ -794,11 +794,9 @@ static void heapify (char **arr, int n, int i)
     }
 
     if (max != i) {
-        char *temp = (char*)calloc(strlen(arr[i])+1, sizeof(char));
-        strcpy (temp, arr[i]);
-        strcpy (arr[i], arr[max]);
-        strcpy (arr[max], temp);
-        free (temp);
+        char *temp = arr[i];
+        arr[i] = arr[max];
+        arr[max] = temp;
         heapify (arr, n, max);
     }
 }
@@ -810,11 +808,9 @@ static void heapSort (char **arr, int n)
     }
 
     for (int i=n-1; i>0; --i) {
-        char *temp = (char*)calloc(strlen(arr[0])+1, sizeof(char));
-        strcpy (temp, arr[0]);
-        strcpy (arr[0], arr[i]);
-        strcpy (arr[i], temp);
-        free (temp);
+        char *temp = arr[0];
+        arr[0] = arr[i];
+        arr[i] = temp;
         heapify (arr, i, 0);
     }
 }
