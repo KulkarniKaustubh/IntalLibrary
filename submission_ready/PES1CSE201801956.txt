@@ -1,0 +1,36 @@
+Introduction
+  An 'intal' is an integer of arbitrary length. An integer in C, is limited by a certain maximum value, which poses problems
+  for fields that require calculations of numbers containing more than 100s or 1000s of digits. These are mainly used in
+  scientific calculations.
+
+Approach
+  All calculations are done after converting character to integer by doing (<character> - '0')
+  
+  For addition : Added the two numbers the way we add numbers since primary school.
+  For difference : Subtracted the two numbers the way we do in primrary school.
+  For multiply : Multiplied the two numbers the way we do in primary school.
+  For mod : Took the difference between the number of digits. Added zeroes to the second number. Then, add it until it could
+            greater than the first number. Then remove one zero and continue the operation. I have used memset to set zeroes
+            as memset is written in machine language and is extremely fast.
+  For pow : Used the iterative approach of the divide and conquer method.
+  For GCD : I take the mod of the second number with the first number and assign the second number as the first number. 
+            This process is repeated until we get 0.
+  For fibonacci : Assigned the first two numbers to 0 and 1. Then added them and kept shifting the value of first number to
+                  the second and the second to the next number in the series.
+  For factorial : Hardcoded and returned 1 if n is 0 or 1. If not, I convert the number to a string and perform difference
+                  and multiplication operations to finally get the factorial of the number n.
+  For max and min : Traverse the array of intals to get the maximum or minimum intal in the array.
+  For search : Performing a simple linear search.
+  For sorting : Implemented a simple heap sort algorithm. Sorts the array resulting in an array having ascending order.
+  For binary search : Sorting the array first and then returning the first occurence of the element. This is done by first
+                      assigning the variable index to -1. When there is a match, I assign index to the index of the element,
+                      and then lower the upper bound to index-1 as I am sorting in ascending order.
+  For coin-row problem : Implementing the coin row problem using only constant space as only a window of three is required.
+  For binary coefficient : If the second number is greater than the first number divided by 2, I subtract 1st number by 2
+                           from the second number and re assign the second number with this number. This is because of a 
+                           property of combinations. I am using a 1D array as the DP table, implementing dynamic programming.
+                           Repeated addition when certain conditions are satisified give us the answer to this problem.
+                           
+Future Scope
+  I had no restrictions to the number of digits in my library. Probably could add many more functions like divide,
+  square root, logarithm, etc.
